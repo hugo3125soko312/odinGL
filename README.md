@@ -1,50 +1,32 @@
 # odinGL
 
-A modern OpenGL wrapper library for the Odin programming language.
-
-## Overview
-
-odinGL provides a clean, type-safe interface for OpenGL development in Odin, simplifying graphics programming with simplified bindings and utility functions.
+Test for usage of OpenGL with [Odin](https://odin-lang.org/) programming language.
 
 ## Features
 
-- OpenGL bindings for Odin
-- Shader management
-- Mesh and geometry handling
-- Camera utilities
-- Math helpers for graphics
+- xxx
 
 ## Getting Started
 
 ### Prerequisites
 
-- Odin compiler
-- OpenGL 4.5+
-- GLFW or platform-specific windowing library
+- Odin compiler (version: "dev-2026-02-nightly:b942f72")
+- OpenGL 4.6
 
 ### Installation
 
-Clone the repository and import into your Odin project:
+Clone the repo
+Run with [Odin](https://odin-lang.org/)
 
-```odin
-import gl "path/to/odinGL"
+```powershell
+git clone https://github.com/hugo3125soko312/odinGL.git
+cd odinGL
+odin run .
 ```
-
-## Usage
-
-```odin
-// Create window and initialize OpenGL context
-// Compile and link shaders
-// Render your graphics
-```
-
-## Contributing
-
-Contributions welcome. Please follow Odin community guidelines.
 
 ## License
 
-[Specify your license here]
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.txt)
 
 ## Resources
 
