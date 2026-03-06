@@ -15,8 +15,8 @@ Test for usage of OpenGL with [Odin](https://odin-lang.org/) programming languag
 
 ### Installation
 
-Clone the repo
-Run with [Odin](https://odin-lang.org/)
+- Clone the repo
+- Run with [Odin](https://odin-lang.org/)
 
 ```powershell
 git clone https://github.com/hugo3125soko312/odinGL.git
