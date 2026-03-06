@@ -4,6 +4,7 @@ import "core:fmt"
 import gl "vendor:OpenGL"
 import glfw "vendor:glfw"
 import "core:os"
+import "core:path/filepath"
 
 main :: proc(){
     // initialize first!
@@ -12,6 +13,7 @@ main :: proc(){
         return
     }
     defer glfw.Terminate()//after scope
+    fmt.println("[DEBUG] GLFW initialized successfully")
 
 
     //hinting
@@ -19,6 +21,7 @@ main :: proc(){
     glfw.WindowHint(glfw.CONTEXT_VERSION_MINOR, 6)
     glfw.WindowHint(glfw.OPENGL_PROFILE, glfw.OPENGL_CORE_PROFILE)
     glfw.WindowHint(glfw.REFRESH_RATE,glfw.DONT_CARE)
+    fmt.println("[DEBUG] Window hints set")
 
 
     //window
@@ -27,16 +30,23 @@ main :: proc(){
     if window == nil {
         fmt.println("glfw.CreateWindow() failed")
     }
-    defer glfw.DestroyWindow(window)// after out of scope: 
+    defer glfw.DestroyWindow(window)// after out of scope:
+    fmt.println("[DEBUG] Window created: 640x480")
+    
     glfw.MakeContextCurrent(window) //make current context
+    fmt.println("[DEBUG] Context made current")
 
     gl.load_up_to(4, 6, glfw.gl_set_proc_address)
+    fmt.println("[DEBUG] OpenGL 4.6 loaded")
+    
     //vertex data
     vertices := [9]f32{
         0.0, 0.5, 0.0,// top
         -0.5, -0.5, 0.0,// bottom right
         0.5, -0.5, 0.0,// bottom left
     }
+    fmt.println("[DEBUG] Vertex data created")
+    
     //vao, vbo
     VAO: u32
     gl.GenVertexArrays(1, &VAO)
@@ -45,18 +55,25 @@ main :: proc(){
     gl.GenBuffers(1,&VBO)
     gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
     gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices, gl.STATIC_DRAW)
+    fmt.println("[DEBUG] VAO ID:", VAO, "VBO ID:", VBO)
 
     //tell gl how to draw buffer
     gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 3 * size_of(f32), 0)
     gl.EnableVertexAttribArray(0)
+    fmt.println("[DEBUG] Vertex attributes configured")
 
     //load shader files
-    vert_src, vert_ok := os.read_entire_file("vertexShader.vert", context.allocator)
-    frag_src, frag_ok := os.read_entire_file("fragmentShader.frag", context.allocator)
+    exe_dir := filepath.dir(os.args[0], context.allocator)
+    vert_path := filepath.join({exe_dir, "vertexShader.vert"}, context.allocator)
+    frag_path := filepath.join({exe_dir, "fragmentShader.frag"}, context.allocator)
+
+    vert_src, vert_ok := os.read_entire_file(vert_path, context.allocator)
+    frag_src, frag_ok := os.read_entire_file(frag_path, context.allocator)
     if !vert_ok || !frag_ok {
         fmt.println("failed to load shader files")
         return
     }
+    fmt.println("[DEBUG] Shader files loaded successfully")
 
     //compile vertex shader
     vert := gl.CreateShader(gl.VERTEX_SHADER)
@@ -64,6 +81,7 @@ main :: proc(){
     gl.ShaderSource(vert, 1, &vert_cstr, nil)
     gl.CompileShader(vert)
     defer gl.DeleteShader(vert)
+    fmt.println("[DEBUG] Vertex shader compiled, ID:", vert)
 
     // compile fragment shader
     frag := gl.CreateShader(gl.FRAGMENT_SHADER)
@@ -71,6 +89,7 @@ main :: proc(){
     gl.ShaderSource(frag, 1, &frag_cstr, nil)
     gl.CompileShader(frag)
     defer gl.DeleteShader(frag)
+    fmt.println("[DEBUG] Fragment shader compiled, ID:", frag)
 
     // link shader program
     shader_program := gl.CreateProgram()
@@ -78,6 +97,7 @@ main :: proc(){
     gl.AttachShader(shader_program, frag)
     gl.LinkProgram(shader_program)
     defer gl.DeleteProgram(shader_program)
+    fmt.println("[DEBUG] Shader program linked, ID:", shader_program)
 
     //offsets
     offset_x: f32 = 0.0
@@ -85,6 +105,9 @@ main :: proc(){
     speed: f32 = 0.01 //change?
 
     offset_loc := gl.GetUniformLocation(shader_program, "offset")
+    fmt.println("[DEBUG] Offset uniform location:", offset_loc)
+    fmt.println("[DEBUG] Initial offset_x:", offset_x, "offset_y:", offset_y, "speed:", speed)
+    fmt.println("[DEBUG] === Ready to enter main loop ===")
 
 
     //main loop
