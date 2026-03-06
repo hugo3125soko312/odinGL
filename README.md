@@ -4,7 +4,7 @@ Test for usage of OpenGL with [Odin](https://odin-lang.org/) programming languag
 
 ## Features
 
-- xxx
+- Nothing special
 
 ## Getting Started
 
