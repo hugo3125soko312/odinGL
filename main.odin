@@ -127,8 +127,17 @@ main :: proc(){
 
     zoom: f32 = 1.0
     zoom_speed: f32 = 0.05
-
     zoom_loc := gl.GetUniformLocation(shader_program, "zoom")
+
+    //rotation
+    rot_x: f32 = 0.0
+    rot_y: f32 = 0.0
+    rot_speed: f32 = 0.05
+    rot_x_loc := gl.GetUniformLocation(shader_program, "rot_x")
+    rot_y_loc := gl.GetUniformLocation(shader_program, "rot_y")
+
+    //centroid for zoom
+    centroid_loc := gl.GetUniformLocation(shader_program, "zoom_center")
 
     //wait 2 sec
     time.sleep(5 * time.Second)
@@ -152,20 +161,25 @@ main :: proc(){
         if glfw.GetKey(window, glfw.KEY_E) == glfw.PRESS { zoom += zoom_speed }
         if glfw.GetKey(window, glfw.KEY_Q) == glfw.PRESS { zoom -= zoom_speed }
         //bind keys ROT ARROWS
-        if glfw.GetKey(window, glfw.KEY_UP) == glfw.PRESS {} 
-        if glfw.GetKey(window, glfw.KEY_DOWN) == glfw.PRESS {}
-        if glfw.GetKey(window, glfw.KEY_LEFT) == glfw.PRESS {}
-        if glfw.GetKey(window, glfw.KEY_RIGHT) == glfw.PRESS {}
+        if glfw.GetKey(window, glfw.KEY_UP) == glfw.PRESS { rot_x += rot_speed } 
+        if glfw.GetKey(window, glfw.KEY_DOWN) == glfw.PRESS { rot_x -= rot_speed }
+        if glfw.GetKey(window, glfw.KEY_LEFT) == glfw.PRESS { rot_y -= rot_speed }
+        if glfw.GetKey(window, glfw.KEY_RIGHT) == glfw.PRESS { rot_y += rot_speed }
 
         //space uniform
         gl.Uniform2f(offset_loc, offset_x, offset_y)
         gl.Uniform1f(zoom_loc, zoom)
+        gl.Uniform1f(rot_x_loc, rot_x)
+        gl.Uniform1f(rot_y_loc, rot_y)
+        gl.Uniform2f(centroid_loc, centroid_x, centroid_y)
 
         fmt.print("\x1b[2J\x1b[H")//genius way to clear console
         //debug info
-        fmt.println("Offsets")
-        fmt.println("X:", offset_x, "Y:", offset_y)
+        fmt.println("=== Transform Debug ===")
+        fmt.println("Position - X:", offset_x, "Y:", offset_y)
         fmt.println("Zoom:", zoom)
+        fmt.println("Rotation - X:", rot_x, "Y:", rot_y)
+        fmt.println("Centroid:", centroid_x, ",", centroid_y)
 
                 
         //draw
