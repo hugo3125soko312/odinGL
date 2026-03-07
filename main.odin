@@ -3,8 +3,9 @@ package main
 import "core:fmt"
 import gl "vendor:OpenGL"
 import glfw "vendor:glfw"
-import "core:os"
+import os "core:os"
 import "core:path/filepath"
+import time "core:time"
 
 main :: proc(){
     // initialize first!
@@ -40,12 +41,28 @@ main :: proc(){
     fmt.println("[DEBUG] OpenGL 4.6 loaded")
     
     //vertex data
-    vertices := [9]f32{
+    //x, y, depth
+    vertex_data := [9]f32{
         0.0, 0.5, 0.0,// top
         -0.5, -0.5, 0.0,// bottom right
         0.5, -0.5, 0.0,// bottom left
     }
     fmt.println("[DEBUG] Vertex data created")
+    
+    // Calculate centroid -> array of x, y, z
+    calculate_centroid :: proc(vertices: [9]f32) -> [3]f32 {
+        centroid_x := (vertices[0] + vertices[3] + vertices[6]) / 3
+        centroid_y := (vertices[1] + vertices[4] + vertices[7]) / 3
+        centroid_z := (vertices[2] + vertices[5] + vertices[8]) / 3
+        return [3]f32{centroid_x, centroid_y, centroid_z}
+    }
+    
+    centroid := calculate_centroid(vertex_data)
+    centroid_x := centroid[0]
+    centroid_y := centroid[1]
+    centroid_z := centroid[2]
+    fmt.println("Centroid:", centroid_x, ",", centroid_y, ",", centroid_z)
+    fmt.println("[DEBUG] Centroid calculated: (", centroid_x, ",", centroid_y, ",", centroid_z, ")")
     
     //vao, vbo
     VAO: u32
@@ -54,7 +71,7 @@ main :: proc(){
     VBO: u32
     gl.GenBuffers(1,&VBO)
     gl.BindBuffer(gl.ARRAY_BUFFER, VBO)
-    gl.BufferData(gl.ARRAY_BUFFER, size_of(vertices), &vertices, gl.STATIC_DRAW)
+    gl.BufferData(gl.ARRAY_BUFFER, size_of(vertex_data), &vertex_data, gl.STATIC_DRAW)
     fmt.println("[DEBUG] VAO ID:", VAO, "VBO ID:", VBO)
 
     //tell gl how to draw buffer
@@ -107,10 +124,16 @@ main :: proc(){
     offset_loc := gl.GetUniformLocation(shader_program, "offset")
     fmt.println("[DEBUG] Offset uniform location:", offset_loc)
     fmt.println("[DEBUG] Initial offset_x:", offset_x, "offset_y:", offset_y, "speed:", speed)
-    fmt.println("[DEBUG] === Ready to enter main loop ===")
 
+    zoom: f32 = 1.0
+    zoom_speed: f32 = 0.05
 
+    zoom_loc := gl.GetUniformLocation(shader_program, "zoom")
+
+    //wait 2 sec
+    time.sleep(5 * time.Second)
     //main loop
+    fmt.println("[DEBUG] === Ready to enter main loop ===")
     for !glfw.WindowShouldClose(window){
         glfw.PollEvents()
 
@@ -126,14 +149,25 @@ main :: proc(){
         if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS { offset_x -= speed }
         if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS { offset_x += speed }
         //bind keys EQ
-        if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS { offset_x -= speed }
-        if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS { offset_x += speed }
+        if glfw.GetKey(window, glfw.KEY_E) == glfw.PRESS { zoom += zoom_speed }
+        if glfw.GetKey(window, glfw.KEY_Q) == glfw.PRESS { zoom -= zoom_speed }
         //bind keys ROT ARROWS
-        if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS { offset_x -= speed }
-        if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS { offset_x += speed }
+        if glfw.GetKey(window, glfw.KEY_UP) == glfw.PRESS {} 
+        if glfw.GetKey(window, glfw.KEY_DOWN) == glfw.PRESS {}
+        if glfw.GetKey(window, glfw.KEY_LEFT) == glfw.PRESS {}
+        if glfw.GetKey(window, glfw.KEY_RIGHT) == glfw.PRESS {}
+
         //space uniform
         gl.Uniform2f(offset_loc, offset_x, offset_y)
+        gl.Uniform1f(zoom_loc, zoom)
 
+        fmt.print("\x1b[2J\x1b[H")//genius way to clear console
+        //debug info
+        fmt.println("Offsets")
+        fmt.println("X:", offset_x, "Y:", offset_y)
+        fmt.println("Zoom:", zoom)
+
+                
         //draw
         gl.DrawArrays(gl.TRIANGLES, 0, 3)
 
