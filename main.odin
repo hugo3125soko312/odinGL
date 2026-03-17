@@ -126,7 +126,9 @@ main :: proc(){
     fmt.println("[DEBUG] Initial offset_x:", offset_x, "offset_y:", offset_y, "speed:", speed)
 
     zoom: f32 = 1.0
-    zoom_speed: f32 = 0.05
+    zoom_speed: f32 = 0.03
+    min_zoom: f32 = 0.1
+    max_zoom: f32 = 10.0
     zoom_loc := gl.GetUniformLocation(shader_program, "zoom")
 
     //rotation
@@ -140,7 +142,7 @@ main :: proc(){
     centroid_loc := gl.GetUniformLocation(shader_program, "zoom_center")
 
     //wait 2 sec
-    time.sleep(5 * time.Second)
+    //time.sleep(5 * time.Second)
     //main loop
     fmt.println("[DEBUG] === Ready to enter main loop ===")
     for !glfw.WindowShouldClose(window){
@@ -157,9 +159,19 @@ main :: proc(){
         if glfw.GetKey(window, glfw.KEY_S) == glfw.PRESS { offset_y -= speed }
         if glfw.GetKey(window, glfw.KEY_A) == glfw.PRESS { offset_x -= speed }
         if glfw.GetKey(window, glfw.KEY_D) == glfw.PRESS { offset_x += speed }
-        //bind keys EQ
-        if glfw.GetKey(window, glfw.KEY_E) == glfw.PRESS { zoom += zoom_speed }
-        if glfw.GetKey(window, glfw.KEY_Q) == glfw.PRESS { zoom -= zoom_speed }
+        //bind keys EQ, zoom clamping
+        if glfw.GetKey(window, glfw.KEY_E) == glfw.PRESS {
+            new_zoom := zoom + zoom_speed
+            if new_zoom <= max_zoom {
+                zoom = new_zoom
+            }
+        }
+        if glfw.GetKey(window, glfw.KEY_Q) == glfw.PRESS {
+            new_zoom := zoom - zoom_speed
+            if new_zoom >= min_zoom {
+                zoom = new_zoom
+            }
+        }
         //bind keys ROT ARROWS
         if glfw.GetKey(window, glfw.KEY_UP) == glfw.PRESS { rot_x += rot_speed } 
         if glfw.GetKey(window, glfw.KEY_DOWN) == glfw.PRESS { rot_x -= rot_speed }
